@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.s3.mapper.HoteventsMapper">
+    <sql id="where">
+        <where>
+            <if test="keyWord!=null and keyWord !='' ">
+                and keyWord like concat('%',#{keyWord},'%')
+            </if>
+        </where>
+    </sql>
+
+    <select id="getCount" resultType="int">
+        select count(*) from hotevents
+        <include refid="where"></include>
+    </select>
+
+    <select id="get4Page" resultType="com.s3.pojo.Hotevents">
+        select * from  hotevents
+        <include refid="where"></include>
+        limit #{pageIndex},#{pageSize}
+    </select>
+    <resultMap id="map1" type="com.s3.pojo.Hotevents">
+        <id column="id" property="id"></id>
+        <collection property="commentslist" ofType="com.s3.pojo.Comments" >
+            <id column="cid" property="id"></id>
+        </collection>
+    </resultMap>
+    <select id="getByid" resultType="map1">
+       SELECT h.*,c.id cid,c.hotId,c.notEventend,c.commentDate
+        FROM hotevents h LEFT JOIN `comments` c ON c.hotId=h.id
+        WHERE h.id=#{id} ORDER BY c.commentDate desc
+    </select>
+    <update id="update" parameterType="int">
+        update hotevents set searchSum=searchSum+1 where id=#{id}
+    </update>
+</mapper>
